@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<list key="org.eclipse.ui.internal.wizards.datatransfer.SmartImportRootWizardPage.knownSources">
+		<item value="C:\Users\maxim\OneDrive\Desktop\development\ShporaSpring\spring-demo-boot"/>
+		<item value="C:\Users\maxim\OneDrive\Desktop\development\ShporaSpring\kurs\63. Spring REST - CRUD Database Real-Time Project - Overview\2.1 spring-crm-rest-demo.zip\spring-crm-rest-demo"/>
+		<item value="C:\Users\maxim\OneDrive\Desktop\development\ShporaSpring\spring-hibernate-source-code-v23\spring-hibernate-source-code-v23\08-spring-rest\starter-code\jackson-databinding-json-demo\jackson-databinding-json-demo"/>
+		<item value="C:\Users\maxim\OneDrive\Desktop\development\ShporaSpring\spring-demo-security"/>
+		<item value="C:\Users\maxim\OneDrive\Desktop\development\ShporaSpring\hibernate-demo-one-to-one-bi-directional"/>
+		<item value="C:\Users\maxim\OneDrive\Desktop\development\ShporaSpring\hibernate-demo-one-to-one"/>
+		<item value="C:\Users\maxim\OneDrive\Desktop\development\ShporaSpring\hibernate-demo-one-to-many"/>
+		<item value="C:\Users\maxim\OneDrive\Desktop\development\ShporaSpring\hibernate-demo-eager-vs-lazy"/>
+		<item value="C:\Users\maxim\OneDrive\Desktop\development\ShporaSpring\hibernate-demo"/>
+		<item value="C:\Users\maxim\OneDrive\Desktop\development\ShporaSpring\hibernate-demo-one-to-many-uni-directional"/>
+	</list>
+</section>

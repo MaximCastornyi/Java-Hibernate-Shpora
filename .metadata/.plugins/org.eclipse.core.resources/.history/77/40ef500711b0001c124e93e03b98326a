@@ -1,0 +1,5 @@
+package com.demo.hibernate;
+
+public class Student {
+
+}

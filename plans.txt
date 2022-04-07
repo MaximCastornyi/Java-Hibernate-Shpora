@@ -1,0 +1,552 @@
+                   
+
+Inversion of Control, IoC принцип объектно-ориентированного - construction and management objects
+Spring Container thrue
+XML configuration (legacy)
+<beans>
+	<bean id="myCoach" class="com.demo.springdemo.BaseballCoach">
+	</bean>
+</beans>
+Java Annotation
+Java Source Code
+
+Create Container:
+– ClassPathXmlApplicationContext
+– AnnotationConfigApplicationContext
+– GenericWebApplicationContext
+– FileSystemXmlApplicationContext
+Загружает данные о бине из XML файла. При использовании этой реализации в конструкторе необходимо указать полный адрес конфигурационного файла.
+– WebXmlApplicationContext
+Эта реализация ApplicationContext получает необходимую информацию из веб-приложения.
+
+XML CONFIGURATION
+
+Constructor injections
+Setter injections (инъенкция в метод)
+и добавить в 
+<beans>
+	<bean id="myCoach" class="com.demo.springdemo.BaseballCoach">
+	//с помощью конструктора
+	<constructor-arg ref="myFortuneService"/>
+	//с помощью метода setFortuneService
+	<property name="FortuneService" ref="myFortuneService"/>
+	//с помощью полей класса
+	<property name="team" value="Sunrisers Hyderabad"/>
+	</bean>
+</beans>
+
+
+Можно читать прямо из property.file
++ прописать
+   <context:property-placeholder location="classpath:sport.properties"/>
+   <property name="emailAddress" value="${foo.team}"/>
+
+BEAN SCOPES
+@Component
+@Scope("prototype")
+<bean id="myCoach" class="com.demo.springdemo.BaseballCoach" scope="singleton | prototype | request | session | global-session">
+
+singleton - single shared
+prototype - new bean instance for each container request
+request - HTTP request thrue web
+session - for HTTP web session
+global-session - global HTTP web session
+
+BEAN LIFECYCLES
+<bean id="myCoach" class="com.demo.springdemo.BaseballCoach" scope="prototype" init-method="doMyMethod" destroy-method="doAnotherMethod">
+
+
+ANNOTATIONS CONFIGURATION
+<bean id="myCoach" class="com.demo.springdemo.BaseballCoach" scope="prototype" init-method="doMyMethod" destroy-method="doAnotherMethod">
+//должна быть пометка
+<context:component-scan base-package="com.demo.springdemo"/>
++
+//должна быть аннотация
+@Component("oneCoach")
+public class SomeClass(){...
++
+добавляется бин в контейнер
+Coach theCoach = context.getBean("oneCoach", Coach.class);
+
+Autowiring:
+1) Constructor Injection
+2) SetterInjection
+3) MethodInjection
+4) FieldInjection
+5) Qualifiers for Dependency Injection
+
+1) Constructor Injection
+@Component
+public class TennisCoach implements Coach {
+	
+	private FortuneService fortuneService;
+	
+	@Autowired
+	public TennisCoach(FortuneService theFortuneService) {
+		fortuneService = theFortuneService;
+	}
+2) SetterInjection
+	//setter injection
+	@Autowired
+	public void setFortuneService(FortuneService theFortuneService) {
+		System.out.println(">>>>>>>>>>Tennis coach setter method");
+		fortuneService = theFortuneService;
+	}
+3) MethodInjection
+	//method injection
+	@Autowired
+	public void doFortuneService(FortuneService theFortuneService) {
+		System.out.println(">>>>>>>>>>Tennis coach method");
+		fortuneService = theFortuneService;
+	}
+4) FieldInjection
+@Autowired
+private FortuneService fortuneService;
+
+5) Qualifiers for Dependency Injection
+используется, когда надо много сервисов имплементимровать
+@Qualifier("happyFortuneService") - это уникальный bean ID
+может добавляться ко всем видам аннотаций
+
+@Scope ANNOTATION
+Default is singleton
+@Scope("prototype") - original for each request
+
+LifeCycle for beans
+@PostConstruct //будет запущен, когда сервер загрузит сервлет, и будет вызываться сервером только один раз,
+@PreConstruct //будет запущен, когда сервер удалит сервлет, и будет вызываться сервером только один раз, подобно методу
+    private void postConstruct() {
+.................
+@PreDestroy
+
+JAVA CONFIGURATION
+1) AnnotationConfigApplicationContext context  = new AnnotationConfigApplicationContext(SportConfig.class);
+2) @Configuration - над классом, который будет конфигурировать другие
+3) @ComponentScan("com.demo.springdemo")
+   public class SportConfig {...
+
+3) определить @Bean и зависимости:
+@Bean
+public SomeClass instance(){
+return new HappyFortuneService();
+}
+тут тоже есть properties файл
+загружается через:
+@PropertySource("classpath:sport.properties")
+потом вставляется так:
+@Value("${foo.email}")
+private String email;
+
+Dispatcher Servlet есть в Spring MVC
+добавляется в WEB-INF/servlet.xml
+потом
+создаем @Controller
+создаем @RequestMapping...
+{
+return file.jsp //возвращает htmp файл из WEB-INF/view
+}
+
+SPRING MVC
+@RequestMapping(value="someValue", RequestMethod.GET)
+
+
+HIBERNATE
+возможно сохранять объекты в базе
+
+Student someStudent = new Student("name", "secondname", "faculty");
+int theId = (Integer)session.save(someStudent);
+
+и удалять
+
+Student myStudent = session.get(Student.class, theId);
+
+запрос
+
+Query query = session.createQuery("from Student");
+List <Student> students = query.list();
+
+Hibernate тоже работает как через XML (легаси), так и через Java аннотации
+Hibernate mapping
+@Entity
+@Table(name="student")
+public class Student(){
+	@Id
+	@Column(name="id")
+	private int id;
+	
+	@Column(name="first_name")
+	private String firstName;
+....
+У Hibernate есть SessionFactory и Session(более маложивущие)
+JPA предоставляет разработчикам четыре стратегии генерации первичных ключей, которые определены в классе перечисления GenerationType, включая GenerationType.TABLE, GenerationType.SEQUENCE, GenerationType.IDENTITY и GenerationType.AUTO. Четыре стратегии генерации первичного ключа описаны ниже.
+1. GenerationType.TABLE
+Механизм персистентности генерирует первичный ключ через определенную таблицу в реляционной базе данных. Преимущество этой стратегии заключается в том, что она не зависит от внешней среды и конкретной реализации базы данных.
+Если вы не укажете список последовательностей, будет создан список последовательностей по умолчанию, автоматически будут сгенерированы имена столбцов в таблице и в базе данных будет сгенерирована таблица с именем sequence (SEQ_NAME, SEQ_COUNT). Список последовательностей обычно содержит только два поля: первое поле - это название стратегии генерации, а второе поле - максимальный порядковый номер таблицы отношений, которая будет постепенно накапливаться при вставке данных. 
+    @Id
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "roleSeq")
+    @TableGenerator(name = "roleSeq", allocationSize = 1, table = "seq_table", pkColumnName = "seq_id", valueColumnName = "seq_count")
+    private Integer id;
+2. GenerationType.SEQUENCE
+В некоторых базах данных саморазвитие первичного ключа не поддерживается, например Oracle, который предоставляет механизм, называемый «последовательность» для генерации первичных ключей. На этом этапе GenerationType.SEQUENCE можно использовать в качестве стратегии генерации первичного ключа. Недостатком этой стратегии является полная противоположность TABLE: поскольку только некоторые базы данных (Oracle, PostgreSQL, DB2) поддерживают объекты последовательностей, эта стратегия обычно не применяется к другим базам данных. Точно так же эта стратегия обычно используется с другой аннотацией @SequenceGenerator, аннотация @SequenceGenerator задает последовательность для генерации первичного ключа. Затем JPA создаст последовательность на основе содержимого аннотации (или использует существующую последовательность). Если последовательность не указана, последовательность SEQ_GEN_SEQUENCE будет сгенерирована автоматически.
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "menuSeq")
+    @SequenceGenerator(name = "menuSeq", initialValue = 1, allocationSize = 1, sequenceName = "MENU_SEQUENCE")
+    private Integer id;
+3. GenerationType.IDENTITY
+Этот вид стратегии генерации первичного ключа обычно известен как саморазвитие первичного ключа. Когда база данных вставляет данные, она автоматически присваивает значение первичному ключу. Например, MYSQL может объявить «auto_increment» при создании таблицы, чтобы указать саморазвитие первичного ключа. Эта стратегия обеспечивает поддержку в большинстве баз данных (указанные методы или ключевые слова могут отличаться), но есть еще несколько баз данных, которые не поддерживают ее, поэтому переносимость немного ухудшена. Чтобы использовать стратегию генерации первичного ключа для саморазвития, вам нужно только объявить policy = GenerationType.IDENTITY. 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+4. GenerationType.AUTO
+тратегия генерации первичного ключа передается механизму персистентности, а механизм персистентности выбирает одну из трех стратегий генерации первичного ключа в соответствии с базой данных. Этот тип стратегии генерации первичного ключа используется чаще, так как стратегия генерации JPA по умолчанию - GenerationType.AUTO, при использовании этой стратегии вы можете явно указать @GeneratedValue (Strategy = GenerationType.AUTO) или напрямую @GeneratedValue
+Похож на
+
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Integer id;
+
+или
+
+    @GeneratedValue
+    private Integer id;
+    
+HQL
+List<Students> theStudents = session
+                             .createQuery("from Student s where s.lastName='Doe'")
+                             .getResultList();   
+                             
+Entity это легковесный хранимый объект бизнес логики (persistent domain object). Основная программная сущность это entity класс, который так же может использовать дополнительные классы, который могут использоваться как вспомогательные классы или для сохранения состояния еntity.                             
+        @Entity
+public class Customer implements Serializable {
+@Id protected Long id;
+protected String name;
+@Embedded protected Address address;
+protected PreferredStatus status;
+@Transient protected int orderCount;
+public Customer() {}
+public Long getId() {return id;}
+protected void setId(Long id) {this.id = id;}
+public String getName() {return name;}
+public void setName(String name) {this.name = name;}
+…
+}
+
+Любой Entity имеет перманентный идентификатор
+– Он отображается в первичный ключ в таблице
+● Идентификатор — примитивный тип
+– @Id—одиночное поле/свойство в Entity
+классе
+– @GeneratedValue—значение может
+генерироватся автоматически, используя
+различные стратегии (SEQUENCE, TABLE,
+IDENTITY, AUTO)
+● Идентификатор – пользовательский класс
+– @EmbeddedId—одиночное поле/свойство в Entity
+классе
+– @IdClass—соответствует множеству полей в
+Entity классе
+
+Управляет жизненным циклом Entity
+объектов
+– persist() - помещает объект в БД
+– remove() - удаляет объект из БД
+– merge() - синхронизирует с БД состояние
+отсоединенного объекта
+– refresh() - обновляет из БД состояние
+объекта 
+
+
+Операция Persist
+public Order createNewOrder(Customer customer) {
+ // Создаем новый объект
+Order order = new Order(customer);
+ // После вызова метода persist() объект меняет свой
+ // статус на управляемый. Во время очередной
+ // операции записи в БД объект будет помещен в БД.
+entityManager.persist(order);
+return order;
+}
+
+Операции Find и Remove
+public void removeOrder(Long orderId) {
+Order order =
+ entityManager.find(Order.class, orderId);
+ // Объект будет удален из БД при очередной
+ // операции записи в БД. Доступ к удаленному
+ // объекту приводит к непредсказуемым
+ // результатам.
+entityManager.remove(order);
+}
+
+Операция Merge
+public OrderLine updateOrderLine(OrderLine orderLine) {
+
+ // Метод merge возвращает управляемую копию
+ // переданного отсодиненного объекта. Если состояние
+ // отсоединного объекта было изменено, то изменения
+ // будут отражены в возвращаемой копии.
+return entityManager.merge(orderLine);
+}
+
+
+Типы EntityManager
+● Управляемый контейнером EntityManager (Java
+EE)
+● Управляемый приложением EntityManager (Java SE)
+
+Как создать EntityManager
+● Разные типы EntityManager создаются по
+разному
+– Управляемый контейнером EntityManager
+(Java EE) создается контейнером и
+становится доступным для приложения
+через механизм инъекций Используется
+аннотация @PersistenceContext.
+– Управляемый приложением EntityManager
+(Java SE) создается и закрывается
+(уничтожается) приложением. 
+
+Persistence Unit
+● Все Entity объекты управляемые
+определенным EntityManager
+определяюсь при помощи Persistence Unit
+● persistence.xml определяет один или
+несколько Persistence Unit
+<persistence-unit name="OrderManagement">
+<mapping-file>mappings.xml</mapping-file>
+<jar-file>order.jar</jar-file>
+<transaction-type>JTA</transaction-type>
+</persistence-unit>
+
+У Entity объекта существует четыре статуса жизненного цикла: new, managed, detached, или removed. Их описание
+1) new — объект создан, но при этом ещё не имеет сгенерированных первичных ключей и пока ещё не сохранен в базе данных,
+2) managed — объект создан, управляется JPA, имеет сгенерированные первичные ключи,
+3) detached — объект был создан, но не управляется (или больше не управляется) JPA,
+4) removed — объект создан, управляется JPA, но будет удален после commit'a транзакции.
+5) refresh- reload/sync
+
+Mapping- соотношение между таблицами и связи между ними   
+
+@OneToOne
+@JoinColumn(name="some name")
+
+CascadeType.PERSIST - связанные сущности тоже сохраняются
+CascadeType.MERGE - 
+CascadeType.REMOVE
+CascadeType.REFRESH
+CascadeType.DETACH
+CascadeType.ALL - все вышеперечисленные
+
+MVC делается так: 
+1) создается Entity или класс Модель (энтитит без аннотаций. типа сущностного интерфейса)
+public class Developer {
+    private int id;
+    private String name;
+    private String specialty;
+    private int experience;
+    ..................
+потом в Контроллере прописыватеся так(тут пример с РЕСТ примером)
+    @RequestMapping(value = "/addDeveloper", method = RequestMethod.POST)
+    public String addStudent(@ModelAttribute("mvc-dispatcher") Developer developer,
+                             ModelMap model) {
+        model.addAttribute("id", developer.getId());
+        model.addAttribute("name", developer.getName());
+        model.addAttribute("specilaty", developer.getSpecialty());
+        model.addAttribute("experience", developer.getExperience());
+Добавляется аннтоация Model
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.ui.ModelMap;
+в конце выдается view в виде JSP
+ return "result";
+
+
+
+@OneToOne(cascade=CascadeType.ALL)
+у него есть Bi-directional отношение
+двунаправленные (bidirectional): когда классы ссылаются друг на друга взаимно.
+Вообще для разрешения подобных противоречий в Hibernate есть понятие owning side (главная сторона). Неглавная сторона помечается свойством mappedBy, ее ссылки имеют второстепенную важность. А главная сторона имеет приоритет.
+Связь один-к-одному может быть двунаправленной. В двунаправленных отношениях одна из сторон (и только одна) должна быть владельцем и нести ответственность за обновление связанных полей.
+
+
+тогда нужно добавить над классом от которого тоже ждут отношения
+
+@OneToOne(mappedBy="instructorDetail")
+private Instructor instructor; //добавлено создание экземпляра целевого класса
+
+а из запрашивающего досутп класса надо добавить
+public class Instructor{.....
+
+@OneToOne(cascade=CascadeType.ALL)
+@JoinColumn(name="instructor_detail_id")
+private InstructorDetail someDetails; //тут тоже создается
+
+
+@OneToMany
+сначаланадо обработать "many"
+public class Course{
+    @ManyToOne
+    @JoinColumn(name="instructor_id", cascade={CascadeType.PERSIST,
+                                           CascadeType.MERGE,
+                                           CascadeType.DETACH,
+                                           CascadeType.REFRESH
+                                          })
+    private Instructor instructor;
+}
+
+далее
+
+public class Instructor{
+@OneToMany(mappedBy="instructor", cascade={CascadeType.PERSIST,
+                                           CascadeType.MERGE,
+                                           CascadeType.DETACH,
+                                           CascadeType.REFRESH
+                                          })
+private List<Course> courses;
+
+bi-directional method link
+class Instructor{
+      public void add(Course tempCourse){
+      if(coursec == null)
+         {
+         coursec = new ArrayList<>();
+         }
+         courses.add(tempCourse);
+         tempCourse.setInstructor(this);
+      }
+      
+}
+
+
+Lazy loading Hibernate
+@Entity
+@Table(name="instructor")
+public class Instructor{
+	@OneToMany(fetch=FetchType.LAZY, mappedBy="instructor")
+	private List<Course> courses;
+	
+}
+To retrieve lazy data you need to create Hibernate session
+а потом уже возвращать или через сессию или через HQL
+
+
+@OneToMany uni-directional
+это с использованием SQL деректив (добавляет каскадинг):
+
+  PRIMARY KEY (`id`),
+  KEY `FK_DETAIL_idx` (`instructor_detail_id`),
+  CONSTRAINT `FK_DETAIL` 
+  FOREIGN KEY (`instructor_detail_id`) 
+  REFERENCES `instructor_detail`
+
+
+@ManyToMany
+В энтити прописать
+	@ManyToMany(fetch=FetchType.LAZY,
+			cascade= {CascadeType.PERSIST, CascadeType.MERGE,
+			 CascadeType.DETACH, CascadeType.REFRESH})
+	@JoinTable(
+			name="course_student",
+			joinColumns=@JoinColumn(name="course_id"),//!!!!!!!!
+			inverseJoinColumns=@JoinColumn(name="student_id")//!!!!!!!!
+			)
+И сделать связь в другой энтити	
+	@JoinTable(
+			name="course_student",
+			joinColumns=@JoinColumn(name="student_id"),//!!!!!!!!
+			inverseJoinColumns=@JoinColumn(name="course_id")//!!!!!!!!
+			)
+
+
+
+Приложения делаются следующим образом:
+создаются файлы:
+Customer.java = Entity
+CustomerDAO.java = Model
+CustomerDAOImpl.java = ModelRealisation
+CustomerController.java = Controller
+все выводится на фронт.
+
+Аннотация @Transactional определяет область действия одной транзакции БД. Транзакция БД происходит внутри области действий persistence context. Persistence context в JPA является EntityManager, который использует внутри класс Session ORM-фреймворка Hibernate (если использовать Hibernate как persistence провайдер).
+Один объект EntityManager может быть использован несколькими транзакциями БД.
+Сама аннотация транзакции определяет область действия одной транзакции базы данных. Транзакция базы данных происходит внутри контекста персистентности .
+
+Контекст персистентности находится в JPA EntityManager , реализованном внутренне с использованием Hibernate Session (при использовании Hibernate в качестве поставщика персистентности).
+
+Контекст постоянства — это просто объект синхронизатора, который отслеживает состояние ограниченного набора объектов Java и гарантирует, что изменения в этих объектах в конечном итоге сохраняются обратно в базу данных.
+
+Это совершенно другое понятие, чем понятие транзакции базы данных. Один Entity Manager может использоваться для нескольких транзакций базы данных , и это на самом деле часто.
+Обычно @Transactional находится в service layer
+
+Spring AOP - cross-cutting logic
+Аннотации
+@Aspect
+@EnableAspectJAutoProxy
+@Pointcut()
+@Befor("")
+@Order()
+@AfterReturning
+@AfterThrowing
+@Afret
+@Around
+
+Аспектно-ориентированное программирование (АОП) — это парадигма программирования являющейся дальнейшим развитием процедурного и объектно-ориентированного программирования (ООП). Идея АОП заключается в выделении так называемой сквозной функциональности. И так все по порядку, здесь я покажу как это сделать в Java — Spring @AspectJ annotation стиле (есть еще schema-based xml стиль, функциональность аналогичная).
+
+Выделении сквозной функциональности
+
+Т.е. есть функциональность которая затрагивает несколько модулей, но она не имеет прямого отношения к бизнес коду, и ее хорошо бы вынести в отдельное место, это и показано на рисунке выше.
+
+Join point — следующее понятие АОП, это точки наблюдения, присоединения к коду, где планируется введение функциональности.
+
+Pointcut — это срез, запрос точек присоединения, — это может быть одна и более точек. Правила запросов точек очень разнообразные, на рисунке выше, запрос по аннотации на методе и конкретный метод. Правила можно объединять по &&, ||,!
+
+Advice — набор инструкций выполняемых на точках среза (Pointcut). Инструкции можно выполнять по событию разных типов:
+
+Before — перед вызовом метода
+After — после вызова метода
+After returning — после возврата значения из функции
+After throwing — в случае exception
+After finally — в случае выполнения блока finally
+Around — можно сделать пред., пост., обработку перед вызовом метода, а также вообще обойти вызов метода.
+
+на один Pointcut можно «повесить» несколько Advice разного типа.
+
+Aspect
+
+image
+
+Aspect — модуль в котором собраны описания Pointcut и Advice.
+Сейчас приведу пример и окончательно все встанет (или почти все) на свои места. Все знаем про логирование кода который пронизывает многие модули, не имея отношения к бизнес коду, но тем не менее без него нельзя. И так отделяю этот функционал от бизнес кода.
+
+GroupID- название фирмы
+ArtefactID- название проекта
+pom.file - project object model file
+
+Spring Security
+Authentication- получить вход
+Authorization -получить роль
+
+сначала создается 
+UserBuilder users = User.withDefaultPasswordEncoder();
+
+есть возможность криптовать пароли
+
+Spring REST (representational state transfer)
+Генерирует JSON а его в POJO маппером
+@PathVariable
+@JsonIgnoreProperties(ignoreUnknown=true)
+
+@RestController
+@RequestMapping("/test")
+public class SomeClass(){
+	
+	@GetMapping("/hello")
+	public string sayHello(){
+	}
+}
+
+Для ошибок @ExceptionHandler и @ControllerAdvice
+для Актуатора надо добавить в депенденси дев тул.
+
+в проект может быть добавлен файл конфигураций в 
+папку resorses добавляется файл application.properties
+
