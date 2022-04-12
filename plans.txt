@@ -550,3 +550,4 @@ public class SomeClass(){
 в проект может быть добавлен файл конфигураций в 
 папку resorses добавляется файл application.properties
 
+Spring Data REST - это часть проекта Spring Data, которая позволяет обращаться к JPA-репозиториям как к REST-сервисам.
